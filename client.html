@@ -25,44 +25,40 @@
             chat.innerHTML += "<p>"+name+" : "+text+"</p>"
         }
 
-        let ws
-        console.log("próba 8080 (lokalny)")
-        const port = 8080;
-        const host = "ws://192.168.1.84"
-        ws = new WebSocket(host+":"+port);
-        
-        ws.onclose = ()=>{
-            console.log("próba 8888 (globalny)")
-            const port = 8888;
-            const host = "wss://srv.lukishere.dev"
-            ws = new WebSocket(host+":"+port);
-            
-            ws.onclose = () => {
-                console.log("rozłączono")
-                stan("rozłączono")
-            };
-        
-            ws.onopen =  () => {
-                console.log("open")
-                stan("połączono (lokalnie)")
-            };
-        
-            ws.onmessage = (e) => {
-                console.log(e)
-                addMassage("support",e.data.toString())
-            };
-        }
-
-        ws.onopen =  () => {
-            console.log("open")
-            stan("połączono (lokalnie)")
+        let onclose = () => {
+            console.log("rozłączono")
+            stan("rozłączono")
         };
-
-        ws.onmessage = (e) => {
+        let onopen =  () => {
+            console.log("open")
+            stan("połączono")
+        };
+        let onmessage = (e) => {
             console.log(e)
             addMassage("support",e.data.toString())
         };
 
+        let ws
+        function init(host,port){
+            ws = new WebSocket(host+":"+port);
+            ws.onmessage = onmessage
+            ws.onopen = onopen
+            ws.onclose = onclose
+        }
+        function globalInit(){
+            const port = 8888;
+            const host = "wss://srv.lukishere.dev"
+            init(host,port)
+        }
+        function localInit(){
+            const port = 8080;
+            const host = "ws://192.168.1.84"
+            init(host,port)
+        }
+        if(window.location.toString().split("/")[0]=="https:")
+            globalInit()
+        else
+            localInit()
 
         function send(){
             const txt = msg.value
