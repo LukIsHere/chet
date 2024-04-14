@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+<body>
+    <h1>Stan : <span id="state">łącznie</span></h1>
+    <div id="chat">
+    </div>
+    <input type="text" id="msg" onchange="send()">
+    <button onclick="send()">wyślij</button>
+    <button onclick="ws.close()">rozłącz</button>
+    <script>
+        const chat = document.getElementById("chat")
+        const msg = document.getElementById("msg")
+
+        function stan(stan){
+            document.getElementById("state").innerHTML = stan
+        }
+
+        function addMassage(name,text){
+            chat.innerHTML += "<p>"+name+" : "+text+"</p>"
+        }
+
+        let ws
+        console.log("próba 8080 (lokalny)")
+        const port = 8080;
+        const host = "ws://192.168.1.84"
+        ws = new WebSocket(host+":"+port);
+        
+        ws.onclose = ()=>{
+            console.log("próba 8888 (globalny)")
+            const port = 8888;
+            const host = "wss://srv.lukishere.dev"
+            ws = new WebSocket(host+":"+port);
+            
+            ws.onclose = () => {
+                console.log("rozłączono")
+                stan("rozłączono")
+            };
+        
+            ws.onopen =  () => {
+                console.log("open")
+                stan("połączono (lokalnie)")
+            };
+        
+            ws.onmessage = (e) => {
+                console.log(e)
+                addMassage("support",e.data.toString())
+            };
+        }
+
+        ws.onopen =  () => {
+            console.log("open")
+            stan("połączono (lokalnie)")
+        };
+
+        ws.onmessage = (e) => {
+            console.log(e)
+            addMassage("support",e.data.toString())
+        };
+
+
+        function send(){
+            const txt = msg.value
+            msg.value = ""
+            ws.send(txt);
+            addMassage("ty",txt)
+        }
+    </script>
+</body>
+</html>
