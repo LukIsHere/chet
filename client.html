@@ -25,13 +25,15 @@
             chat.innerHTML += "<p>"+name+" : "+text+"</p>"
         }
 
+        let connectionType;
+
         let onclose = () => {
             console.log("rozłączono")
             stan("rozłączono")
         };
         let onopen =  () => {
             console.log("open")
-            stan("połączono")
+            stan("połączono("+connectionType+")")
         };
         let onmessage = (e) => {
             console.log(e)
@@ -46,11 +48,14 @@
             ws.onclose = onclose
         }
         function globalInit(){
+            connectionType = "Globalnie"
             const port = 8888;
             const host = "wss://srv.lukishere.dev"
             init(host,port)
+            ws.onclose = localInit
         }
         function localInit(){
+            connectionType = "Lokalnie"
             const port = 8080;
             const host = "ws://192.168.1.84"
             init(host,port)
